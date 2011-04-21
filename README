@@ -1,0 +1,41 @@
+The Smalltalk Graph
+=============
+ 
+Idea: Store Smalltalk code in a Graph database to facilitate analysis and searching.
+Smalltalk code consists of Methods, Selectors, Variables, Pragma?s, Classes, Packages, Package versions and Configurations.
+ 
+Use cases
+==========
+- Search for Smalltalk artefacts
+- View a Smalltalk artefact and navigate to related artefacts
+- View changes over time of an artefact
+- View Developer activity per Package/Configuration over time
+- Make it possible to limit the scope of searches to a specific configuration version
+- Analyse whether a configuration is valid
+- Analyse the compatibility of a package with a configuration version
+ 
+Possible future use cases:
+- Perform code analysis (SmallLint) on configurations and store the results in the Graph
+- The Graph database could be used as an Envy like SCM
+- Add support for Google Code Search https://www.google.com/support/webmasters/bin/answer.py?hl=en&answer=75225
+ 
+Why useful?
+============
+- Provides code search facilities similar to Smalltalk image but on all versions of all (open source) Smalltalk code
+- Makes analysis of possible compatibility problems much easier.
+ 
+Validation rules for Configuration versions
+- A class can only be defined once
+- All superclasses of defined classes must be present
+- All extended classes must be defined
+- References to global values must exist (warning)
+- Messages that are sent must have implementers (warning)
+ 
+ 
+Technical setup
+==============
+- A graph database ? Neo4j server
+- A Smalltalk client for this database CloudforkNeo, uses the REST interface of Neo4j
+- Smalltalk functionality to import Monticello packages into the graph
+- Smalltalk Web GUI to view/search/analyse the graph
+- Neo4j extension plugin to add extra REST services for efficient Graph manipulation and traversing (currently written in Java)
