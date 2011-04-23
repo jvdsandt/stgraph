@@ -43,6 +43,9 @@ public class StGraph extends ServerPlugin {
 		return nodes;
     }
 	
+	@Name( "get_nodes_with_outrelationships_to" )
+    @Description( "Get all nodes with the same out relationships" )
+    @PluginTarget( GraphDatabaseService.class )
 	public Iterable<Node> getNodesWithOutRelationshipsTo( @Source GraphDatabaseService graphDb,
 			@Parameter(name="nodeIds") long[] nodeIds,
 			@Parameter(name="types") String[] relTypeNames) {

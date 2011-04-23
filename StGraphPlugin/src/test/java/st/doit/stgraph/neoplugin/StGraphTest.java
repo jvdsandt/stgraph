@@ -21,7 +21,7 @@ public class StGraphTest extends Neo4JTest {
     
     private Index<Node> index;
     
-    private StGroovy plugin = new StGroovy();
+    private StGraph plugin = new StGraph();
 
 	@Before
     public void createTestData() {
@@ -60,19 +60,65 @@ public class StGraphTest extends Neo4JTest {
         relationship.setProperty("speedlimit", speedLimit);
     }
     
+    @Test
+    public void testGetCityNodes() {
+    	for (String city : CITIES) {
+    		Node node = index.get(KEY_CITY_NAME, city).getSingle();
+    		Assert.assertNotNull(node);
+    	}
+    }
+    
+    @Test
+    public void testGetNodesWithType() {
+    	Iterable<Node> nodes = plugin.getNodesWithType(getGraphDatabaseService(), "City");
+    	List<Node> nodeList = new ArrayList<Node>();
+    	for (Node node : nodes) {
+    		nodeList.add(node);
+    	}
+    	Assert.assertEquals(CITIES.size(), nodeList.size());
+    }
+    
+    @Test
+    public void testGetIdenticalNodes() {
+    	Node node = nodeForCity("Amsterdam");
+    	Iterable<Node> nodes = plugin.getIdenticalNodes(node, new String[] { KEY_CITY_NAME });
+    	
+    	Assert.assertTrue(nodes.iterator().hasNext());
+    	Node result = nodes.iterator().next();
+    	Assert.assertEquals("AMS2", result.getProperty(KEY_CITY_NAME));
+    }
+    
+    @Test
+    public void testDeleteWithOutgoing() {
+    	Node node = nodeForCity("Amsterdam");
+    	long id = node.getId();
+    	plugin.deleteWithOutgoing(node);
+    	
+        getTransaction().success();
+        getTransaction().finish();
+
+    	try {
+    		getGraphDatabaseService().getNodeById(id);
+    		Assert.assertTrue("Exception expected", false);
+    	} catch (NotFoundException ex) {
+    		Assert.assertNotNull(ex);
+    	}
+    }
+    
+    @Test
+    public void testGetNodesWithOutRelationshipsTo() {
+    	Node node1 = nodeForCity("Leeuwarden");
+    	Node node2 = nodeForCity("Rotterdam");
+    	    	
+    	Iterable<Node> nodes = plugin.getNodesWithOutRelationshipsTo(getGraphDatabaseService(), 
+    			new long[] { node1.getId(), node2.getId() }, 
+    			new String[] { "ROAD", "ROAD" });
+    	Assert.assertTrue(nodes.iterator().hasNext());
+   
+    }
+    
     protected Node nodeForCity(String city) {
         return index.get(KEY_CITY_NAME, city).getSingle();
     }
-
-    @Test
-    public void testCreateNode() {
-    	String script = 
-    		"def node = graphDb.createNode()\n" +
-    		"node.setProperty(\"name\", \"pipo\")\n" +
-    		"def list = [node]\n" +
-    		"return list";
-    	Iterable<Node> result = plugin.execNodesScript(getGraphDatabaseService(), script);
-    	Assert.assertNotNull(result);
-    	Assert.assertEquals("pipo", result.iterator().next().getProperty("name"));
-    }
+	
 }	
